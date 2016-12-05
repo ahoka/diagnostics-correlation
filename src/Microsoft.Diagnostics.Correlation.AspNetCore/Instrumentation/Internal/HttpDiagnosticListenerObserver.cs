@@ -42,14 +42,17 @@ namespace Microsoft.Diagnostics.Correlation.AspNetCore.Instrumentation.Internal
                 if (request != null)
                 {
                     var ctx = ContextResolver.GetRequestContext<TContext>();
-                    if (endpointValidator.Validate(request.RequestUri))
+                    if (ctx != null)
                     {
-                        foreach (var injector in contextInjectors)
+                        if (endpointValidator.Validate(request.RequestUri))
                         {
-                            injector.UpdateRequest(ctx, request);
+                            foreach (var injector in contextInjectors)
+                            {
+                                injector.UpdateRequest(ctx, request);
+                            }
                         }
+                        requestNotifier.OnBeforeRequest(ctx, request);
                     }
-                    requestNotifier.OnBeforeRequest(ctx, request);
                 }
             }
             else if (value.Key == "System.Net.Http.Response")
